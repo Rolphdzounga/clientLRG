@@ -5,6 +5,8 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Terminus from './Terminus'
 import styles from "./Username.module.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   MenuItem,
   FormControl,
@@ -74,7 +76,7 @@ const Adhesion = () => {
     //paysResidence:"",
     //provinceResidence:"",
     //villeResidence:"",
-    const [data,setData] = useState({
+    /*const [data,setData] = useState({
         accordadherent: true,
         adresse: "2241",
         arrmilitantisme: "6",
@@ -99,8 +101,8 @@ const Adhesion = () => {
         signature: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARQ",
         telephone: "04878738",
         villagemilitantisme: "mon village",
-    })
-    /*const [data,setData] = useState({
+    })*/
+    const [data,setData] = useState({
         prenoms:"",
         noms:"",
         email:"",
@@ -125,7 +127,7 @@ const Adhesion = () => {
         datenaissance:'',
         dateversement:'',
         signature:''
-    })*/
+    })
     const [loader, setLoader] = React.useState(false)
     const telecharger = ()=>{
         const capture = document.querySelector('.docAdherent')
@@ -149,15 +151,27 @@ const soumettreForm = async (data) =>{
       /*const response = await axios.post('http://localhost:8888/api/v1/ajouterAdherent',data )  {`${import.meta.env.VITE_APP_BASE_URL}/adherents`}
       console.log('localhost:8888/api/v1/ajouterAdherent__',response)*/
       const response2 = await axios.put(`${import.meta.env.VITE_APP_BASE_URL}/adherents`,data )
-       console.log(response2)
+      console.log('____________response2 err___________',response2.status)
+       telecharger()
        setCurrentStep(prev=>prev + 1)
        //setCookie('user', 'user', { path: '/' })
       //ignIn({})
-      //localStorage.setItem("token", response.data.accessToken);
+      //localStorage.setItem("token", response.data.accessToken); "adherent_numpieceidentite_key"
     }catch(err){
+        console.log(err)
+        console.log(err.response.data.message || err.response.data.error.original.detail)
+        if(err.response.status == 500 && err.response.data.error.original.constraint == "adherent_numpieceidentite_key" ) return toast.error("Cette pièce d'identité a déjà été renseigné par un autre adherent")
+
+        if(err.response.status == 409 ) return toast.error(err.response.data.message)
+       return toast.error(err.response.data.error.original.detail)
+       /* console.log('____________response2 err___________',err.response.data.error.original.detail)
+        console.log('____________response2 err___________',err.response.status)
+        toast.error(err.response.data.message || err.response.data.error.original.detail)
+        if(err.response.status == 409) toast.error(err.response.data.message || err.response.data.error.original.detail);
+        if(err.response.status == 500) toast.error(err.response.data.error.original.detail);
         if(err && err.instanceof.AxiosError)
             setError(err.response?.data.message)
-        else if (err && err.instanceof.Error) setError(err.message)
+        else if (err && err.instanceof.Error) setError(err.message)*/
     }
 
 }
@@ -165,8 +179,8 @@ const soumettreForm = async (data) =>{
  const handleNextStep = (newData, final = false) =>{
     setData(prev => ({...prev,...newData}))
     if(final){
-        telecharger()
         soumettreForm(data)
+        
     }else{
 
         setCurrentStep(prev=>prev + 1)
@@ -187,7 +201,7 @@ const soumettreForm = async (data) =>{
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="fr">
     <Container>
-       
+        <ToastContainer />
       <div className='md:w-5/6 p-10 mx-auto shadow-xl rounded-2xl pb-2 bg-white mt-10'>
       <div className='flex justify-center pb-8'><strong>FORMULAIRE D'ADHESION</strong></div>
         <Stepper activeStep={currentStep} alternativeLabel>
@@ -335,7 +349,7 @@ const StepOne_ = (props)=>{
 
                             <Grid item xs={12}>
                                 <Grid container spacing={2} className="align-items-center">
-                                    <Grid item xs={4}>
+                                    <Grid item xs={12} sm={6} md={4}>
                                     <Field 
                                         component={DatePicker} 
                                            name="datenaissance"
@@ -346,7 +360,7 @@ const StepOne_ = (props)=>{
 
                                     />   
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid item xs={12} sm={6} md={8}>
                                         <Grid item  className='w-full'>
                                             <Field
                                             component={TextField}
@@ -380,14 +394,14 @@ const StepOne_ = (props)=>{
                            
                             <Grid item xs={12}>
                                 <Grid container spacing={2} className="align-items-center">
-                                    <Grid item xs={4}>
+                                    <Grid item xs={12} sm={6} md={4}>
                                     <Field component={TextField} name="telephone"
                                             label="Numero de téléphone"
                                             helperText="Saisir votre numéro de téléphone"
                                             fullWidth
                                              />   
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid item xs={12} sm={6} md={8}>
                                         <Grid item  className='w-full'>
                                             <Field
                                             component={TextField}
@@ -420,7 +434,7 @@ const StepOne_ = (props)=>{
 
                             <Grid item xs={12}>
                                 <Grid container spacing={2} className="align-items-center">
-                                    <Grid item xs={4}>
+                                    <Grid item xs={12} sm={6} md={4}>
                                         <FormControl fullWidth>
                                             <Field
                                                 component={Select}
@@ -440,7 +454,7 @@ const StepOne_ = (props)=>{
                                             </Field>
                                         </FormControl>
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid item xs={12} sm={6} md={8}>
                                         <MonField c={TextField} n="numpieceidentite" l="Numero piece identité*" />
                                     </Grid>
                                 </Grid>
@@ -501,7 +515,7 @@ const StepTwo = (props)=>{
                                   
 
 <div className="my-4">
-<Grid item xs={4}>
+<Grid item xs={12} sm={6} md={4}>
 <Autocomplete
 onChange={(event, value) => {
     console.log('Autocomplete_',value)
@@ -539,7 +553,7 @@ renderInput={(params) => <TextField2 {...params} label="Province où vous milite
 
 <Grid item xs={12}>
     <Grid container spacing={2} className="align-items-center">
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} >
             
 
             <Autocomplete
@@ -562,7 +576,7 @@ renderInput={(params) => <TextField2 {...params} label="Province où vous milite
                 />   
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} >
             
                 <Field 
                 component={TextField2} 
@@ -595,7 +609,7 @@ renderInput={(params) => <TextField2 {...params} label="Province où vous milite
 
 <Grid item xs={12} >
     <Grid container spacing={2} className="align-items-center">
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} >
             
 
         <Autocomplete
@@ -622,7 +636,7 @@ renderInput={(params) => <TextField2 {...params} label="Province où vous milite
             />
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} >
 
             <Grid item xs={12}>
                 <Grid item  className='w-full'>
@@ -641,7 +655,7 @@ renderInput={(params) => <TextField2 {...params} label="Province où vous milite
 </Grid>
 </div>
 <div className="my-4">
-<Grid item xs={8}>
+<Grid item xs={12} sm={6} md={8}>
 
     <Field
     component={TextField2}
@@ -693,9 +707,9 @@ const StepTree= (props)=>{
                         <div className='mt-10 flex flex-col gap-3'>
                         <Grid item xs={12} >
                         <Grid container spacing={2} className="align-items-center">
-                            <Grid item xs={6}>
+                            <Grid item xs={12} sm={6}>
                                 <FormControl className='mr-10' >
-                                    <FormLabel id="demo-radio-buttons-group-label">Choisir Votre montant de quotisation</FormLabel>
+                                    <FormLabel id="demo-radio-buttons-group-label">Choisir Votre montant de cotisation</FormLabel>
                                     <RadioGroup 
                                         aria-labelledby="demo-controlled-radio-buttons-group"
                                         name="montantquotisation"
@@ -708,7 +722,7 @@ const StepTree= (props)=>{
                                     </RadioGroup>
                                 </FormControl>
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid item xs={12} sm={6} md={4}>
                                     <Field 
                                         component={DatePicker} 
                                         format="DD"

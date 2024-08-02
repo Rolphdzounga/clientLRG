@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 //import { mockDataTeam } from "./mockData";
 import ExportExcel from "./excelexport";
@@ -21,6 +21,10 @@ import {
 } from "@mui/material";
 import Header from "./Header";
 import { writeFileXLSX,utils } from "xlsx";
+import { Delete, Edit } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useAdherentStore } from "../../../store/store";
+import { accountService } from "../../../_services/account.service";
 
 const fileExtension = ".xlsx";
 const fileName = "Export Excel";
@@ -40,8 +44,8 @@ const Adherent = ({categ,champ,titre,url}) => {
  // const { data, isLoading } = useGetProductsQuery();
  // const isNonMobile = useMediaQuery("(min-width: 1000px)");
   
-
-
+  const navigate = useNavigate()
+ const [validationErrors, setValidationErrors] = useState({});
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
@@ -75,7 +79,9 @@ const { data, isLoading, isError, refetch, isFetching } = useQuery({
     fetchURL.searchParams.set('globalFilter', globalFilter ?? '');
     fetchURL.searchParams.set('sorting', JSON.stringify(sorting ?? []));
 
-    const response = await fetch(fetchURL.href);
+    const response = await fetch(fetchURL.href, { headers: {
+      'Authorization': 'Bearer ' + accountService.getToken(),
+    }});
     const json = await response.json();
     return json;
   },
@@ -83,7 +89,72 @@ const { data, isLoading, isError, refetch, isFetching } = useQuery({
    
 });
 
+const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
+  
+  /*if (!Object.keys(validationErrors).length) {
+    tableData[row.index] = values;
+   fetch(url + "/", {
+    method: "PUT",
+    headers: {
+      'Content-type': "application/json"
+    },
+    body: JSON.stringify(values)
+  }).then(resp => resp.json())
+    .then(resp => {
 
+      toast.success(`Mise à jour réussie. ${JSON.stringify(values.username)}`)
+      getAgents()
+      //resolve()
+    }).catch(err=>toast.error(`Echec de mise à jour..`))
+    exitEditingMode(); //required to exit editing mode and close modal
+  }*/
+};
+
+const handleCancelRowEdits = () => {
+  setValidationErrors({});
+};
+
+const handleDeleteRow = useCallback(
+  /*(row) => {
+    if (
+      !confirmAlert({
+        title: 'suppression utilisateur',
+        message: `Etes vous sur de vouloir supprimer l' utilisateur ${row.getValue('email')} ?`,
+        buttons: [
+          {
+            label: 'Annuler',
+          },
+          {
+            label: 'Supprimer',
+            onClick:async () => {
+            await  fetch(url + "/" + row.original.id, {
+                method: "delete",
+                headers: {
+                  'Content-type': "application/json"
+                },
+              }).then(resp => resp.json())
+                .then(resp => {
+                  getAgents()
+                  notify(`Suppréssion de ${row.getValue('email')} réussie!!!`)
+                  //resolve()
+                 // exitEditingMode();
+                })
+                
+              //  tableData.splice(row.index, 1);
+                //setTableData([...tableData]);
+            }
+          }      
+        ]
+      })
+    ) {
+      return;
+    }
+    //send api delete request here, then refetch or update local table data for re-render
+
+  },
+  [tableData],*/
+);
+const setAdherent = useAdherentStore((state) => state.setData);
 console.log('data_____________',data)
   return (
     <Box m="1.5rem 2.5rem">
@@ -108,6 +179,28 @@ console.log('data_____________',data)
           enableColumnResizing
           enableStickyHeader
           enableColumnActions={false}
+          enableEditing
+          onEditingRowSave={handleSaveRowEdits}
+          onEditingRowCancel={handleCancelRowEdits}
+          renderRowActions={({ row, table }) => (
+            <Box sx={{ display: 'flex'}}>
+              <Tooltip arrow placement="left" title="Edit">
+                <IconButton onClick={() =>{
+                  console.log('row____',row.original) 
+                  setAdherent(row.original)
+                  navigate(`/admin/adherent/edit`)
+
+                }}> {/**table.setEditingRow(row) */}
+                  <Edit />
+                </IconButton>
+              </Tooltip> 
+              <Tooltip arrow placement="right" title="Delete">
+                <IconButton color="error" onClick={() => handleDeleteRow(row)}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
           localization={MRT_Localization_FR}
           muiTableHeadCellProps={{
             align: "center",

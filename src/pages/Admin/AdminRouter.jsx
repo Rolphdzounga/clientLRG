@@ -23,7 +23,7 @@ const AdminRouter = () => {
             <Route path='edit' element={<AdherentEdit/>} />
           </Route>
           <Route path='/user'>
-            <Route index element={<User />} />
+            <Route index element={<User categ="" champ={adherentGrid}  titre="LISTE DES UTILISATEURS" url={`${import.meta.env.VITE_APP_BASE_URL}/users`} />} />
             <Route path='add' element={<Add />} />
             <Route path='edit' element={<Edit/>} />
           </Route>

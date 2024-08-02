@@ -21,6 +21,8 @@ import {
 } from "@mui/material";
 import Header from "./Header";
 import { writeFileXLSX,utils } from "xlsx";
+import { accountService } from "../../../_services/account.service";
+import { useNavigate } from "react-router-dom";
 
 const fileExtension = ".xlsx";
 const fileName = "Export Excel";
@@ -66,7 +68,7 @@ const { data, isLoading, isError, refetch, isFetching } = useQuery({
   ],
   queryFn: async () => {
     const fetchURL = new URL(url);
-    fetchURL.searchParams.set(
+    /*fetchURL.searchParams.set(
       'start',
       `${pagination.pageIndex * pagination.pageSize}`,
     );
@@ -74,8 +76,10 @@ const { data, isLoading, isError, refetch, isFetching } = useQuery({
     fetchURL.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
     fetchURL.searchParams.set('globalFilter', globalFilter ?? '');
     fetchURL.searchParams.set('sorting', JSON.stringify(sorting ?? []));
-
-    const response = await fetch(fetchURL.href);
+*/
+    const response = await fetch(fetchURL.href, { headers: {
+      'Authorization': 'Bearer ' + accountService.getToken(),
+    }});
     const json = await response.json();
     return json;
   },
@@ -83,7 +87,7 @@ const { data, isLoading, isError, refetch, isFetching } = useQuery({
    
 });
 
-
+let navigate = useNavigate()
 console.log('data_____________',data)
   return (
     <Box m="1.5rem 2.5rem">
@@ -100,6 +104,11 @@ console.log('data_____________',data)
 
               
             </Box>
+            <Button  onClick={()=>{
+                accountService.logout()
+                navigate('/')
+              }} >Logout
+            </Button>
     </Box>
   );
 };

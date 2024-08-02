@@ -7,7 +7,7 @@ export const adherentGrid = [
     accessorKey: "photo", 
     header: "PHOTO",
     Cell: ({ renderedCellValue }) => <div className='profile flex justify-center'>
-      <Avatar alt="photo" src={renderedCellValue ||JSON.stringify(renderedCellValue)} sx={{ width: 60, height: 60 }} />
+      <Avatar alt="photo" src={renderedCellValue ||JSON.stringify(renderedCellValue)} sx={{ width: 40, height: 40 }} />
       </div>,
     size: 130,
     muiTableBodyCellProps: {

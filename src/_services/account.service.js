@@ -29,9 +29,20 @@ let logout = () => {
  * Etat de la présence d'un token en localStorage
  * @returns {boolean}
  */
+const isTokenExpired = token => Date.now() >= (JSON.parse(atob(token?.split('.')[1]))).exp * 1000
+
 let isLogged = () => {
     let token = localStorage.getItem('token')
-    return !!token
+    
+    console.log('isLogged___',token)
+
+    token && console.log('isTokenExpired___',isTokenExpired(token))
+
+    if(token && !isTokenExpired(token)){
+        return true
+    }else{
+        return false
+    }
 }
 
 /**
